@@ -1,0 +1,361 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>nginxCtl &mdash; nginxCtl 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="nginxCtl 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">nginxCtl 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for nginxCtl</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This is a simple nginx tool.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+<span class="k">class</span> <span class="nc">bcolors</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This class is to display differnet colour fonts</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">HEADER</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[95m&#39;</span>
+    <span class="n">OKBLUE</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[94m&#39;</span>
+    <span class="n">OKGREEN</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[92m&#39;</span>
+    <span class="n">WARNING</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[93m&#39;</span>
+    <span class="n">FAIL</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[91m&#39;</span>
+    <span class="n">ENDC</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[0m&#39;</span>
+    <span class="n">BOLD</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[1m&#39;</span>
+    <span class="n">CYAN</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[96m&#39;</span>
+    <span class="n">UNDERLINE</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[4m&#39;</span>
+
+<div class="viewcode-block" id="nginxCtl"><a class="viewcode-back" href="../index.html#nginxCtl.nginxCtl">[docs]</a><span class="k">class</span> <span class="nc">nginxCtl</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for nginxCtl functionalities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="nginxCtl.get_version"><a class="viewcode-back" href="../index.html#nginxCtl.nginxCtl.get_version">[docs]</a>    <span class="k">def</span> <span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discovers installed nginx version </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="s">&quot;nginx -v&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="n">version</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">output</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">err</span>
+</div>
+<div class="viewcode-block" id="nginxCtl.get_conf_parameters"><a class="viewcode-back" href="../index.html#nginxCtl.nginxCtl.get_conf_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_conf_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds nginx configuration parameters</span>
+<span class="sd">        :returns: list of nginx configuration parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="s">&quot;nginx -V 2&gt;&amp;1 | grep &#39;configure arguments:&#39;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="n">conf</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">output</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;configure arguments:&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">dict</span>
+</div>
+    <span class="k">def</span> <span class="nf">get_nginx_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conf_parameters</span><span class="p">()[</span><span class="s">&#39;--conf-path&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;nginx is not installed!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_nginx_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conf_parameters</span><span class="p">()[</span><span class="s">&#39;--sbin-path&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;nginx is not installed!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_nginx_pid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conf_parameters</span><span class="p">()[</span><span class="s">&#39;--pid-path&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;nginx is not installed!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_nginx_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conf_parameters</span><span class="p">()[</span><span class="s">&#39;--lock-path&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;nginx is not installed!!!&quot;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">start_nginx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nginx_conf_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_conf</span><span class="p">()</span>
+        <span class="n">nginx_lock_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_lock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">nginx_lock_path</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;nginx is already running... Nothing to be done!&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;nginx -c &quot;</span> <span class="o">+</span> <span class="n">nginx_conf_path</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">err</span><span class="p">:</span>
+                <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">nginx_lock_path</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+                <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">print</span> <span class="s">&quot;Starting nginx:</span><span class="se">\t\t\t\t\t</span><span class="s">    [  &quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">OKGREEN</span> <span class="o">+</span> <span class="s">&quot;OK&quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span> <span class="o">+</span> <span class="s">&quot;  ]&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">err</span>
+
+    <span class="k">def</span> <span class="nf">stop_nginx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nginx_pid_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_pid</span><span class="p">()</span>
+        <span class="n">nginx_lock_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_lock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">nginx_lock_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">nginx_pid_path</span><span class="p">):</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;nginx -s quit&quot;</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nginx_lock_path</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">&quot;Stoping nginx:</span><span class="se">\t\t\t\t\t</span><span class="s">    [  &quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">OKGREEN</span> <span class="o">+</span> <span class="s">&quot;OK&quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span> <span class="o">+</span> <span class="s">&quot;  ]&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">err</span>
+
+    <span class="k">def</span> <span class="nf">configtest_nginx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="s">&quot;nginx -t&quot;</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">output</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="k">print</span> <span class="n">err</span>
+
+    <span class="k">def</span> <span class="nf">restart_nginx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_nginx</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_nginx</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">status_nginx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nginx_pid_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_pid</span><span class="p">()</span>
+        <span class="n">nginx_lock_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_lock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">nginx_lock_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">nginx_pid_path</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pid_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">nginx_pid_path</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">pid_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">pid_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;ps -p &quot;</span> <span class="o">+</span> <span class="n">pid</span> <span class="o">+</span> <span class="s">&quot; -o comm=&quot;</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                    <span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">output</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">output</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;nginx (pid &quot;</span> <span class="o">+</span> <span class="n">pid</span> <span class="o">+</span> <span class="s">&quot;) is running ...&quot;</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Cannot open nginx pid file&quot;</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">nginx_lock_path</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">nginx_pid_path</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;nginx pid file exists&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;nginx is stopped&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_vhosts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nginx_conf_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_conf</span><span class="p">()</span>
+        <span class="n">fo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">nginx_conf_path</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">vhost_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s">&quot;include&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="n">vhost_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">mydict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vhost_files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;/*&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="nb">dir</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/*&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/*&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ext</span><span class="p">):</span>
+                        <span class="nb">file</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/*&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">f</span>
+                        <span class="c"># print file.strip(&quot;\n&quot;)</span>
+                        <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">domain</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                        <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">):</span>
+                            <span class="n">li</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                            <span class="n">num</span> <span class="o">=</span> <span class="n">num</span> <span class="o">+</span> <span class="mi">1</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">li</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;server_name&#39;</span><span class="p">,</span> <span class="n">li</span><span class="p">):</span>
+                                    <span class="n">li</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                                    <span class="n">li</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;_&quot;</span><span class="p">:</span>
+                                        <span class="n">domain</span> <span class="o">=</span> <span class="s">&quot;default_server_name&quot;</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">domain</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="n">domain_num</span> <span class="o">=</span> <span class="n">num</span>
+                                    <span class="n">alias</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">:]</span>
+                                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;listen&#39;</span><span class="p">,</span> <span class="n">li</span><span class="p">):</span>
+                                    <span class="n">li</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                                    <span class="n">li</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+                                    <span class="n">port</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">domain</span> <span class="ow">and</span> <span class="n">port</span><span class="p">:</span>
+                                    <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="n">domain_num</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">alias</span><span class="p">)</span>
+                                    <span class="n">mydict</span><span class="p">[(</span><span class="n">domain</span><span class="p">,</span> <span class="n">port</span><span class="p">)]</span> <span class="o">=</span> <span class="n">info</span>
+                                    <span class="n">domain</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                                    <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">domain</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">):</span>
+                    <span class="n">li</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">num</span> <span class="o">=</span> <span class="n">num</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">li</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;server_name&#39;</span><span class="p">,</span> <span class="n">li</span><span class="p">):</span>
+                            <span class="n">li</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;_&quot;</span><span class="p">:</span>
+                                <span class="n">domain</span> <span class="o">=</span> <span class="s">&quot;default_server_name&quot;</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">domain</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">domain_num</span> <span class="o">=</span> <span class="n">num</span>
+                            <span class="n">alias</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">:]</span>
+                        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;listen&#39;</span><span class="p">,</span> <span class="n">li</span><span class="p">):</span>
+                            <span class="n">li</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                            <span class="n">port</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">domain</span> <span class="ow">and</span> <span class="n">port</span><span class="p">:</span>
+                            <span class="n">info</span> <span class="o">=</span> <span class="p">(</span><span class="n">domain_num</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">alias</span><span class="p">)</span>
+                            <span class="n">mydict</span><span class="p">[(</span><span class="n">domain</span><span class="p">,</span> <span class="n">port</span><span class="p">)]</span> <span class="o">=</span> <span class="n">info</span>
+                            <span class="n">domain</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                            <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+        <span class="k">print</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">BOLD</span> <span class="o">+</span> <span class="s">&quot;nginx vhost configuration:&quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">mydict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">port</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="s">&quot;*&quot;</span>
+                <span class="n">port</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">print</span> <span class="n">ip</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s">&quot;  &quot;</span> <span class="o">+</span> <span class="s">&quot;is a Virtualhost&quot;</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">port &quot;</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">OKGREEN</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span> <span class="o">+</span> <span class="s">&quot; (&quot;</span> <span class="o">+</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;)&quot;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">alias  &quot;</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">CYAN</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="n">bcolors</span><span class="o">.</span><span class="n">ENDC</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">configtest_nginx</span><span class="p">()</span>
+
+</div>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">nginxCtl</span><span class="p">()</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">(</span><span class="n">usage</span><span class="o">=</span><span class="s">&quot;usage: %prog [options]&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&quot;%prog 1.0&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&#39;-S&#39;</span><span class="p">,</span> <span class="s">&#39;--list-vhosts&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;list_vhosts&#39;</span><span class="p">,</span>
+                      <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;List configured vhost&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--configtest&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;configtest&#39;</span><span class="p">,</span>
+                      <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;configuration test&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s">&#39;--start&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;start&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Start nginx service&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s">&#39;--stop&#39;</span><span class="p">,</span>  <span class="n">dest</span><span class="o">=</span><span class="s">&#39;stop&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Stop nginx service&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s">&#39;--restart&#39;</span><span class="p">,</span>  <span class="n">dest</span><span class="o">=</span><span class="s">&#39;restart&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Restart nginx service&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s">&#39;--status&#39;</span><span class="p">,</span>  <span class="n">dest</span><span class="o">=</span><span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;nginx service status&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">list_vhosts</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">get_vhosts</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">start_nginx</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">stop_nginx</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">restart</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">restart_nginx</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">status_nginx</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">configtest</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">n</span><span class="o">.</span><span class="n">configtest_nginx</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">nginxCtl 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Alex Alexander.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
