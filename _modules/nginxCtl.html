@@ -102,20 +102,26 @@
                 <span class="nb">dict</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">return</span> <span class="nb">dict</span>
 </div>
-    <span class="k">def</span> <span class="nf">get_nginx_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="nginxCtl.get_nginx_conf"><a class="viewcode-back" href="../index.html#nginxCtl.nginxCtl.get_nginx_conf">[docs]</a>    <span class="k">def</span> <span class="nf">get_nginx_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :returns: nginx configuration path location</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conf_parameters</span><span class="p">()[</span><span class="s">&#39;--conf-path&#39;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&quot;nginx is not installed!!!&quot;</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">get_nginx_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nginxCtl.get_nginx_bin"><a class="viewcode-back" href="../index.html#nginxCtl.nginxCtl.get_nginx_bin">[docs]</a>    <span class="k">def</span> <span class="nf">get_nginx_bin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :returns: nginx binary location </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conf_parameters</span><span class="p">()[</span><span class="s">&#39;--sbin-path&#39;</span><span class="p">]</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&quot;nginx is not installed!!!&quot;</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-
+</div>
     <span class="k">def</span> <span class="nf">get_nginx_pid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_conf_parameters</span><span class="p">()[</span><span class="s">&#39;--pid-path&#39;</span><span class="p">]</span>
