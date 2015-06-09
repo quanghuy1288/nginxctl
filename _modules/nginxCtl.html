@@ -229,14 +229,11 @@
 <span class="sd">        /etc/nginx/nginx.conf, and looks for keyword Include. It parse all files</span>
 <span class="sd">        and folders referenced by Include directrive. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">nginx_conf_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_conf</span><span class="p">()</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parse nginx main configuration file and create a list of files and</span>
-<span class="sd">        folders referenced by Include directive. </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nginx_conf_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nginx_conf</span><span class="p">()</span>     <span class="c">#path of main nginx file</span>
         <span class="n">fo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">nginx_conf_path</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
         <span class="nb">file</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="n">vhost_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c"># Get a list of files/folders refernced with &#39;include&#39; directive on main nginx config</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">):</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span>
@@ -245,14 +242,15 @@
                     <span class="n">vhost_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">mydict</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vhost_files</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s">&quot;/*&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+            <span class="c"># find how a folder is specified on nginx config.</span>
+            <span class="k">if</span> <span class="s">&quot;/*&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span> 
                 <span class="nb">dir</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/*&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">ext</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/*&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/*&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span>  <span class="c"># find the extension.</span>
                 <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ext</span><span class="p">):</span>
                         <span class="nb">file</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/*&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">f</span>
-                        <span class="c"># print file.strip(&quot;\n&quot;)</span>
                         <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="n">domain</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
                         <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
