@@ -9,13 +9,14 @@ This is a small tool to manage nginx service on a server. This is similar to
 apachectl and the main feature of this tool is listing all enabled vhosts on a
 nginx service.
 
-.. code-block:: python
-python nginxCtly.py -h
-Usage: /root/nginxctl/nginxCtl.py [option]
-Example: /root/nginxctl/nginxCtl.py -v
+Usage::
+
+    python nginxCtly.py -h
+    Usage: /root/nginxctl/nginxCtl.py [option]
+    Example: /root/nginxctl/nginxCtl.py -v
 
 
-Available options:
+    Available options:
     -S list nginx vhosts
     -t configuration test
     -k start|stop|status|restart
