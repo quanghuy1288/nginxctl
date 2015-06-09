@@ -284,36 +284,72 @@
 </div>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">nginxCtl</span><span class="p">()</span>
-    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">(</span><span class="n">usage</span><span class="o">=</span><span class="s">&quot;usage: %prog [options]&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&quot;%prog 1.0&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&#39;-S&#39;</span><span class="p">,</span> <span class="s">&#39;--list-vhosts&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;list_vhosts&#39;</span><span class="p">,</span>
-                      <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;List configured vhost&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--configtest&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;configtest&#39;</span><span class="p">,</span>
-                      <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;configuration test&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
-        <span class="s">&#39;--start&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;start&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Start nginx service&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
-        <span class="s">&#39;--stop&#39;</span><span class="p">,</span>  <span class="n">dest</span><span class="o">=</span><span class="s">&#39;stop&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Stop nginx service&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
-        <span class="s">&#39;--restart&#39;</span><span class="p">,</span>  <span class="n">dest</span><span class="o">=</span><span class="s">&#39;restart&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Restart nginx service&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
-        <span class="s">&#39;--status&#39;</span><span class="p">,</span>  <span class="n">dest</span><span class="o">=</span><span class="s">&#39;status&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;nginx service status&quot;</span><span class="p">)</span>
-    <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+<span class="c">#    parser = OptionParser(usage=&quot;usage: %prog [options]&quot;, version=&quot;%prog 1.0&quot;)</span>
+<span class="c">#    parser.add_option(&#39;-S&#39;, &#39;--list-vhosts&#39;, dest=&#39;list_vhosts&#39;,</span>
+<span class="c">#                      action=&quot;store_true&quot;, help=&quot;List configured vhost&quot;)</span>
+<span class="c">#    parser.add_option(&#39;-t&#39;, &#39;--configtest&#39;, dest=&#39;configtest&#39;,</span>
+<span class="c">#                      action=&quot;store_true&quot;, help=&quot;configuration test&quot;)</span>
+<span class="c">#    parser.add_option(</span>
+<span class="c">#        &#39;--start&#39;, dest=&#39;start&#39;, action=&quot;store_true&quot;, help=&quot;Start nginx service&quot;)</span>
+<span class="c">#    parser.add_option(</span>
+<span class="c">#        &#39;--stop&#39;,  dest=&#39;stop&#39;, action=&quot;store_true&quot;, help=&quot;Stop nginx service&quot;)</span>
+<span class="c">#    parser.add_option(</span>
+<span class="c">#        &#39;--restart&#39;,  dest=&#39;restart&#39;, action=&quot;store_true&quot;, help=&quot;Restart nginx service&quot;)</span>
+<span class="c">#    parser.add_option(</span>
+<span class="c">#        &#39;--status&#39;,  dest=&#39;status&#39;, action=&quot;store_true&quot;, help=&quot;nginx service status&quot;)</span>
+<span class="c">#    (options, args) = parser.parse_args()</span>
+<span class="c">#</span>
+<span class="c">#    if options.list_vhosts is True:</span>
+<span class="c">#        n.get_vhosts()</span>
+<span class="c">#    elif options.start is True:</span>
+<span class="c">#        n.start_nginx()</span>
+<span class="c">#    elif options.stop is True:</span>
+<span class="c">#        n.stop_nginx()</span>
+<span class="c">#    elif options.restart is True:</span>
+<span class="c">#        n.restart_nginx()</span>
+<span class="c">#    elif options.status is True:</span>
+<span class="c">#        n.status_nginx()</span>
+<span class="c">#    elif options.configtest is True:</span>
+<span class="c">#        n.configtest_nginx()</span>
+<span class="c">#    else:</span>
+<span class="c">#        parser.print_help()</span>
+<span class="c">#</span>
+    <span class="k">def</span> <span class="nf">usage</span><span class="p">():</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s">&quot;Usage: </span><span class="si">%s</span><span class="s"> [option]&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s">&quot;Example: </span><span class="si">%s</span><span class="s"> -v&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;Available options:&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">-S list nginx vhosts&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">-t configuration test&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">-k start|stop|status|restart&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">-v version&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">-h help&quot;</span> 
 
-    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">list_vhosts</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">n</span><span class="o">.</span><span class="n">get_vhosts</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">n</span><span class="o">.</span><span class="n">start_nginx</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">n</span><span class="o">.</span><span class="n">stop_nginx</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">restart</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">n</span><span class="o">.</span><span class="n">restart_nginx</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">n</span><span class="o">.</span><span class="n">status_nginx</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">configtest</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">n</span><span class="o">.</span><span class="n">configtest_nginx</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;version 1.0&quot;</span>
+ 
+    <span class="n">commandsDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;-S&quot;</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">get_vhosts</span><span class="p">,</span> <span class="s">&quot;-t&quot;</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">configtest_nginx</span><span class="p">,</span> <span class="s">&quot;-k&quot;</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">restart_nginx</span><span class="p">,</span> <span class="s">&quot;-v&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span> <span class="s">&quot;-h&quot;</span><span class="p">:</span><span class="n">usage</span> <span class="p">}</span>
+    <span class="n">subcommandsDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;start&quot;</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">start_nginx</span><span class="p">,</span> <span class="s">&quot;stop&quot;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">stop_nginx</span><span class="p">,</span> <span class="s">&quot;restart&quot;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">restart_nginx</span><span class="p">,</span> <span class="s">&quot;status&quot;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">status_nginx</span><span class="p">}</span>
+    <span class="n">allCommandsDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;-S&quot;</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">get_vhosts</span><span class="p">,</span> <span class="s">&quot;-t&quot;</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">configtest_nginx</span><span class="p">,</span> <span class="s">&quot;-k&quot;</span><span class="p">:</span>
+    <span class="n">n</span><span class="o">.</span><span class="n">restart_nginx</span><span class="p">,</span> <span class="s">&quot;-v&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span> <span class="s">&quot;-h&quot;</span><span class="p">:</span><span class="n">usage</span><span class="p">,</span> <span class="s">&quot;start&quot;</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">start_nginx</span><span class="p">,</span>
+    <span class="s">&quot;stop&quot;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">stop_nginx</span><span class="p">,</span> <span class="s">&quot;restart&quot;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">restart_nginx</span><span class="p">,</span> <span class="s">&quot;status&quot;</span><span class="p">:</span><span class="n">n</span><span class="o">.</span><span class="n">status_nginx</span><span class="p">}</span>
+    <span class="n">commandline_args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">commandline_args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">commandline_args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">allCommandsDict</span><span class="p">:</span>
+                <span class="n">allCommandsDict</span><span class="p">[</span><span class="n">argument</span><span class="p">]()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">usage</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">commandline_args</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;-k&quot;</span><span class="p">:</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flag</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">subcommandsDict</span><span class="p">:</span>
+                    <span class="n">subcommandsDict</span><span class="p">[</span><span class="n">f</span><span class="p">]()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">usage</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
-
+        <span class="n">usage</span><span class="p">()</span>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
