@@ -74,6 +74,12 @@ Available options:
 <em class="property">class </em><code class="descclassname">nginxCtl.</code><code class="descname">nginxCtl</code><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class for nginxCtl functionalities</p>
 <dl class="method">
+<dt id="nginxCtl.nginxCtl.configtest_nginx">
+<code class="descname">configtest_nginx</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.configtest_nginx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.configtest_nginx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure there is no syntax errors are reported. The &#8216;nginx -t&#8217; command is used for this.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="nginxCtl.nginxCtl.get_conf_parameters">
 <code class="descname">get_conf_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.get_conf_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.get_conf_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds nginx configuration parameters</p>
@@ -114,9 +120,69 @@ Available options:
 </dd></dl>
 
 <dl class="method">
+<dt id="nginxCtl.nginxCtl.get_nginx_lock">
+<code class="descname">get_nginx_lock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.get_nginx_lock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.get_nginx_lock" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">nginx lock file location which is required to control nginx services</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nginxCtl.nginxCtl.get_nginx_pid">
+<code class="descname">get_nginx_pid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.get_nginx_pid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.get_nginx_pid" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">nginx pid location which is required to control nginx services</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="nginxCtl.nginxCtl.get_version">
 <code class="descname">get_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.get_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.get_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Discovers installed nginx version</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nginxCtl.nginxCtl.get_vhosts">
+<code class="descname">get_vhosts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.get_vhosts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.get_vhosts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discover a list of configured vhosts by parsing nginx configuration
+files and print those vhosts on commanline. 
+This function parses nginx default configuration file,
+/etc/nginx/nginx.conf, and looks for keyword Include. It parse all files
+and folders referenced by Include directrive.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nginxCtl.nginxCtl.restart_nginx">
+<code class="descname">restart_nginx</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.restart_nginx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.restart_nginx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restart nginx service. Stop and Start nginx functions are used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nginxCtl.nginxCtl.start_nginx">
+<code class="descname">start_nginx</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.start_nginx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.start_nginx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start nginx service if pid and socket file do not exist.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nginxCtl.nginxCtl.status_nginx">
+<code class="descname">status_nginx</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.status_nginx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.status_nginx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report nginx status based on pid and socket files.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nginxCtl.nginxCtl.stop_nginx">
+<code class="descname">stop_nginx</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.stop_nginx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.stop_nginx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop nginx service.</p>
 </dd></dl>
 
 </dd></dl>
