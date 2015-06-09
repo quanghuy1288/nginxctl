@@ -46,9 +46,9 @@
             
   <div class="section" id="welcome-to-nginxctl-s-documentation">
 <h1>Welcome to nginxCtl&#8217;s documentation!<a class="headerlink" href="#welcome-to-nginxctl-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This is a small tool to manage nginx service on a server. This is similar to
-apachectl and the main feature of this tool is listing all enabled vhosts on a
-nginx service.</p>
+<p>This is a simple tool to manage nginx service on a server. This tool is similar to
+apachectl but for nginx. The important feature  of this tool is ability to list vhosts configured on a
+nginx server.</p>
 <p>Usage:</p>
 <div class="highlight-python"><div class="highlight"><pre>python nginxCtly.py -h
 Usage: /root/nginxctl/nginxCtl.py [option]
@@ -76,8 +76,15 @@ Available options:
 <dl class="method">
 <dt id="nginxCtl.nginxCtl.get_conf_parameters">
 <code class="descname">get_conf_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nginxCtl.html#nginxCtl.get_conf_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nginxCtl.nginxCtl.get_conf_parameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds nginx configuration parameters
-:returns: list of nginx configuration parameters</p>
+<dd><p>Finds nginx configuration parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of nginx configuration parameters</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">

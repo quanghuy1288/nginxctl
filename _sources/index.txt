@@ -5,9 +5,9 @@
 
 Welcome to nginxCtl's documentation!
 ====================================
-This is a small tool to manage nginx service on a server. This is similar to
-apachectl and the main feature of this tool is listing all enabled vhosts on a
-nginx service.
+This is a simple tool to manage nginx service on a server. This tool is similar to
+apachectl but for nginx. The important feature  of this tool is ability to list vhosts configured on a
+nginx server.
 
 Usage::
 
