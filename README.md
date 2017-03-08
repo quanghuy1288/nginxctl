@@ -6,7 +6,7 @@ nginx service.
 
 <h2>Download/Installation</h2>
 ```
-wget https://github.rackspace.com/alex4511/nginxctl/raw/master/nginxctl.py -O
+wget https://raw.githubusercontent.com/fooltruth/nginxctl/master/nginxCtl.py -O
 nginxctl.py 
 python nginxctl.py
 ```
