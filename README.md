@@ -1,29 +1,37 @@
 <h1>NginxCtl</h1>
 
-This is a small tool to manage nginx service on a server. This is similar to
-apachectl and the main feature of this tool is listing all enabled vhosts on a
-nginx service.
+The nginxctl allows to control some of the functionlities of nginx daemon.
+This tool is similar to apachectl and which main feature is to list
+domains configured on a nginx webserver.
 
 <h2>Download/Installation</h2>
 ```
-wget https://raw.githubusercontent.com/fooltruth/nginxctl/master/nginxCtl.py -O
-nginxctl.py 
+wget https://raw.githubusercontent.com/fooltruth/nginxctl/master/nginxCtl.py -O nginxctl.py 
 python nginxctl.py
 ```
 
 <h2>Usage</h2>
 ```
-python nginxctl.py -h
-Usage: nginxctl.py [options]
+Usage: nginxctl.py [option]
+Example: nginxctl.py -v
 
-Options:
-  --version          show program version number and exit
-  -h, --help         show this help message and exit
-  -S, --list-vhosts  List configured vhost
-  -t, --configtest   configuration test
-  --start            Start nginx service
-  --stop             Stop nginx service
-  --restart          Restart nginx service
+
+Available options:
+	-S list nginx vhosts
+	-t configuration test
+	-k start|stop|status|restart|fullstatus
+	-v version
+	-h help
 ```
 
+Here is an example of running the option to discover virtual hosts
+```
+# python nginxctl.py -S
+nginx vhost configuration:
+*:8080 is a Virtualhost
+	port 8080 namevhost  example.com  (/etc/nginx/sites-enabled/example.com:5)
+[::]:80 is a Virtualhost
+	port 80 namevhost  example.com  (/etc/nginx/sites-enabled/example.com:5)
+
+```
 Documentation can be found at: http://fooltruth.github.io/nginxctl/
