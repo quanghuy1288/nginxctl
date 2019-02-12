@@ -1,16 +1,16 @@
-<h1>NginxCtl</h1>
-
+## NginxCtl
 The nginxctl allows to control some of the functionlities of nginx daemon.
 This tool is similar to apachectl and which main feature is to list
 domains configured on a nginx webserver.
 
-<h2>Download/Installation</h2>
+### Download/Installation
 ```
-wget https://raw.githubusercontent.com/fooltruth/nginxctl/master/nginxCtl.py -O nginxctl.py 
+git clone https://github.com/rackerlabs/nginxctl.git 
+cd nginxctl
 python nginxctl.py
 ```
 
-<h2>Usage</h2>
+### Usage
 ```
 Usage: nginxctl.py [option]
 Example: nginxctl.py -v
@@ -24,7 +24,7 @@ Available options:
 	-h help
 ```
 
-Here is an example of running the option to discover virtual hosts
+Here is an example of running the option to discover virtual hosts:
 ```
 # python nginxctl.py -S
 nginx vhost configuration:
@@ -32,6 +32,4 @@ nginx vhost configuration:
 	port 8080 namevhost  example.com  (/etc/nginx/sites-enabled/example.com:5)
 [::]:80 is a Virtualhost
 	port 80 namevhost  example.com  (/etc/nginx/sites-enabled/example.com:5)
-
 ```
-Documentation can be found at: http://fooltruth.github.io/nginxctl/
