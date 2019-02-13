@@ -24,7 +24,9 @@ class nginxCtlTests(unittest.TestCase):
         test_vhost_content = "server {\n\
                                     listen 8080;\n\
                                     listen [::]:80;\n\
-                                    server_name example.com;\n\
+                                    server_name example.com\n\
+                                            www.example.com\n\
+                                            blog.example.com;\n\
                                     root /var/www/html;\n\
                                     index index.html;\n\
                                     client_max_body_size 4G;\n\
@@ -47,8 +49,10 @@ class nginxCtlTests(unittest.TestCase):
         n = nginxctl.nginxCtl()
         vhost_info = n._get_vhosts_info(vhost_file.name)
         servername = vhost_info[0]['servername']
+        serveralias = vhost_info[0]['alias']
         ip_port = vhost_info[0]['ip_port']
         self.assertEqual('example.com', servername)
+        self.assertEqual(['www.example.com', 'blog.example.com'], serveralias)
         self.assertEqual(['8080', '[::]:80'], ip_port)
         vhost_file.close()
 
