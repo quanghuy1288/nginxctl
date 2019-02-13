@@ -387,7 +387,7 @@ Attempt to query /server-status returned an error
             ip_port = []
             server_name_found = False
             server_dict = {}
-            stored = ''
+            store_multiline = ''
             for line_num, li in enumerate(vhost_data, start=server_block[0]):
                 l = vhost_data[line_num]
                 if line_num >= server_block[1]:
@@ -403,13 +403,20 @@ Attempt to query /server-status returned an error
                     continue
                 l = l.split('#')[0]
 
+                # Continue recording directive information if the line
+                # doesn't end with ';' (eg. server_name's listed on new lines)
                 if not l.strip().endswith(';'):
                     if line_num != server_block[0]:
-                        stored += l.strip() + ' '
+                        store_multiline += l.strip() + ' '
                     continue
-                l = stored + l
+
+                # Once the directive has been "closed" (ends with ';') and
+                # multi_line_buffer is being used, proceed as if all information
+                # was on a single line and reset buffer.
+                if store_multiline:
+                    l = store_multiline + l
+                    store_multiline = ''
                 l = l.strip().strip(';')
-                stored = ''
 
                 if l.startswith('server_name') and server_name_found:
                     alias += l.split()[1:]
