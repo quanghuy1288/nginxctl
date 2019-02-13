@@ -1,4 +1,7 @@
 ## NginxCtl
+
+[![Build Status](https://travis-ci.org/rackerlabs/nginxctl.svg?branch=master)](https://travis-ci.org/rackerlabs/nginxctl) 
+
 The nginxctl allows to control some of the functionlities of nginx daemon.
 This tool is similar to apachectl and which main feature is to list
 domains configured on a nginx webserver.
