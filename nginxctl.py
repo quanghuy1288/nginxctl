@@ -519,6 +519,6 @@ def main():
         else:
             usage()
     else:
-        usage()
+        n.get_vhosts()
 if __name__ == "__main__":
     main()
