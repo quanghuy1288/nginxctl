@@ -430,7 +430,7 @@ Attempt to query /server-status returned an error
                     ip_port.append(l.split()[1])
         return server_dict_ret
 
-    def get_vhosts(self):
+    def get_vhosts(self, exclude_string=None):
         vhosts_list = self._get_vhosts()
         print "%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC)
         for vhost in vhosts_list:
@@ -453,6 +453,11 @@ Attempt to query /server-status returned an error
                 serveralias = vhost.get('alias', None)
                 line_number = vhost.get('l_num', None)
                 config_file = vhost.get('config_file', None)
+                try:
+                    if exclude_string in servername:
+                        continue
+                except TypeError:  # Used to skip empty servernames
+                    pass
                 print "%s:%s is a Virtualhost" % (ip, port)
                 print "\tport %s namevhost %s %s %s (%s:%s)" % (port,
                                                                 bcolors.OKGREEN,
@@ -466,6 +471,21 @@ Attempt to query /server-status returned an error
                                                   bcolors.ENDC)
 
 
+def exclude(exclude_args):
+    """
+    Used to exclude domains from the output
+    """
+    n = nginxCtl()
+    for e in exclude_args:
+        try:
+            exclude = e
+            n.get_vhosts(exclude_string=exclude)
+            sys.exit(0)
+        except IndexError:
+            usage()
+            sys.exit(1)
+
+
 def main():
     n = nginxCtl()
 
@@ -475,10 +495,13 @@ def main():
         print "\n"
         print "Available options:"
         print "\t-S list nginx vhosts"
+        print "\t\t--exclude <word>"
         print "\t-t configuration test"
         print "\t-k start|stop|status|restart|fullstatus"
         print "\t-v version"
         print "\t-h help"
+        print "Default option is -S (if no option provided)"
+
 
     def version():
         print "version 1.1"
@@ -493,6 +516,7 @@ def main():
                        "restart": n.restart_nginx,
                        "status": n.status_nginx,
                        "fullstatus": n.full_status}
+    subcommandExclude = {"--exclude": exclude}
     allCommandsDict = {"-S": n.get_vhosts,
                        "-t": n.configtest_nginx,
                        "-k": usage,
@@ -503,7 +527,9 @@ def main():
                        "restart": n.restart_nginx,
                        "status": n.status_nginx,
                        "fullstatus": n.full_status}
+
     commandline_args = sys.argv[1:]
+
     if len(commandline_args) == 1:
         for argument in commandline_args:
             if argument in allCommandsDict:
@@ -516,9 +542,20 @@ def main():
             for f in flag:
                 if f in subcommandsDict:
                     subcommandsDict[f]()
+        elif sys.argv[1] in subcommandExclude:
+            flag = sys.argv[2:]
+            subcommandExclude[sys.argv[1]](flag)
         else:
             usage()
+    elif len(commandline_args) == 3:
+        if sys.argv[1] == "-S":
+            flag = sys.argv[2:]
+            for f in flag:
+                if f in subcommandExclude:
+                    del flag[flag.index("--exclude")]
+                    subcommandExclude[f](flag)
     else:
         n.get_vhosts()
+
 if __name__ == "__main__":
     main()
