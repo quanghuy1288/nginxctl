@@ -18,15 +18,16 @@
 # specific language governing permissions and limitations under the License.
 #
 
-import subprocess
-import re
-import sys
 import os
+import re
+import subprocess
+import sys
 import urllib2
+
+from config import LOG
 
 
 class bcolors:
-
     """
     This class is to display differnet colour fonts
     """
@@ -42,7 +43,6 @@ class bcolors:
 
 
 class nginxCtl:
-
     """
     A class for nginxCtl functionalities
     """
@@ -54,7 +54,7 @@ class nginxCtl:
         version = "nginx -v"
         p = subprocess.Popen(
             version, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-            )
+        )
         output, err = p.communicate()
         return err
 
@@ -82,7 +82,7 @@ class nginxCtl:
         try:
             return self.get_conf_parameters()['--conf-path']
         except KeyError:
-            print "nginx is not installed!!!"
+            LOG.error("nginx is not installed!!!")
             sys.exit()
 
     def get_nginx_bin(self):
@@ -92,7 +92,7 @@ class nginxCtl:
         try:
             return self.get_conf_parameters()['--sbin-path']
         except:
-            print "nginx is not installed!!!"
+            LOG.error("nginx is not installed!!!")
             sys.exit()
 
     def get_nginx_pid(self):
@@ -103,7 +103,7 @@ class nginxCtl:
         try:
             return self.get_conf_parameters()['--pid-path']
         except:
-            print "nginx is not installed!!!"
+            LOG.error("nginx is not installed!!!")
             sys.exit()
 
     def get_nginx_lock(self):
@@ -114,7 +114,7 @@ class nginxCtl:
         try:
             return self.get_conf_parameters()['--lock-path']
         except:
-            print "nginx is not installed!!!"
+            LOG.error("nginx is not installed!!!")
             sys.exit()
 
     def start_nginx(self):
@@ -124,7 +124,7 @@ class nginxCtl:
         nginx_conf_path = self.get_nginx_conf()
         nginx_lock_path = self.get_nginx_lock()
         if os.path.exists(nginx_lock_path):
-            print "nginx is already running... Nothing to be done!"
+            LOG.warn("nginx is already running... Nothing to be done!")
         else:
             cmd = "nginx -c " + nginx_conf_path
             p = subprocess.Popen(cmd,
@@ -136,12 +136,12 @@ class nginxCtl:
             if not err:
                 file = open(nginx_lock_path, 'w')
                 file.close()
-                print "Starting nginx:\t\t\t\t\t    [ %sOK%s ]" % (
+                LOG.info("Starting nginx:\t\t\t\t\t    [ %sOK%s ]" % (
                     bcolors.OKGREEN,
                     bcolors.ENDC
-                    )
+                ))
             else:
-                print err
+                LOG.error(err)
 
     def stop_nginx(self):
         """
@@ -162,7 +162,7 @@ class nginxCtl:
                                      )
                 pid, err = p.communicate()
             except IOError:
-                print "Cannot open nginx pid file"
+                LOG.error("Cannot open nginx pid file")
             if pid:
                 cmd = "nginx -s quit"
                 p = subprocess.Popen(cmd,
@@ -174,12 +174,12 @@ class nginxCtl:
                 if not err:
                     if os.path.exists(nginx_lock_path):
                         os.remove(nginx_lock_path)
-                    print "Stoping nginx:\t\t\t\t\t    [  %sOK%s  ]" % (
+                    LOG.info("Stoping nginx:\t\t\t\t\t    [  %sOK%s  ]" % (
                         bcolors.OKGREEN,
                         bcolors.ENDC
-                        )
+                    ))
                 else:
-                    print err
+                    LOG.error(err)
 
     def configtest_nginx(self):
         """
@@ -191,9 +191,9 @@ class nginxCtl:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True
-            )
+        )
         output, err = p.communicate()
-        print err
+        LOG.error(err)
 
     def restart_nginx(self):
         """
@@ -209,23 +209,23 @@ class nginxCtl:
         try:
             request = urllib2.urlopen('http://localhost/server-status')
             if str(request.getcode()) == "200":
-                print """
+                LOG.info("""
 Nginx Server Status
 -------------------
 %s
-                    """ % request.read()
+                    """ % request.read())
             else:
-                print """
+                LOG.warn("""
 Nginx Server Status
 -------------------
 server-status did not return a 200 response.
-                    """
+                    """)
         except (urllib2.HTTPError, urllib2.URLError):
-            print """
+            LOG.error("""
 Nginx Server Status
 -------------------
 Attempt to query /server-status returned an error
-                """
+                """)
 
     def status_nginx(self):
         """
@@ -246,14 +246,13 @@ Attempt to query /server-status returned an error
                     shell=True)
                 output, err = p.communicate()
                 if output:
-                    print "nginx (pid %s) is running ..." % pid
+                    LOG.info("nginx (pid %s) is running ..." % pid)
             except IOError:
-                print "Cannot open nginx pid file"
-        elif (os.path.exists(nginx_lock_path) and not
-                os.path.exists(nginx_pid_path)):
-            print "nginx pid file exists"
+                LOG.error("Cannot open nginx pid file")
+        elif (os.path.exists(nginx_lock_path) and not os.path.exists(nginx_pid_path)):
+            LOG.warn("nginx lock file exists")
         else:
-            print "nginx is stopped"
+            LOG.warn("nginx is stopped")
 
     def _get_vhosts(self):
         """
@@ -432,7 +431,7 @@ Attempt to query /server-status returned an error
 
     def get_vhosts(self):
         vhosts_list = self._get_vhosts()
-        print "%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC)
+        LOG.info( "%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC))
         for vhost in vhosts_list:
             ip_ports = vhost['ip_port']
             for ip_port_x in ip_ports:
@@ -453,17 +452,17 @@ Attempt to query /server-status returned an error
                 serveralias = vhost.get('alias', None)
                 line_number = vhost.get('l_num', None)
                 config_file = vhost.get('config_file', None)
-                print "%s:%s is a Virtualhost" % (ip, port)
-                print "\tport %s namevhost %s %s %s (%s:%s)" % (port,
+                LOG.info( "%s:%s is a Virtualhost" % (ip, port))
+                LOG.info( "port %s namevhost %s %s %s (%s:%s)" % (port,
                                                                 bcolors.OKGREEN,
                                                                 servername,
                                                                 bcolors.ENDC,
                                                                 config_file,
-                                                                line_number)
+                                                                line_number))
                 for alias in serveralias:
-                    print "\t\talias %s %s %s" % (bcolors.CYAN,
+                    LOG.info( "alias %s %s %s" % (bcolors.CYAN,
                                                   alias,
-                                                  bcolors.ENDC)
+                                                  bcolors.ENDC))
 
 
 def main():
@@ -520,5 +519,7 @@ def main():
             usage()
     else:
         usage()
+
+
 if __name__ == "__main__":
     main()
