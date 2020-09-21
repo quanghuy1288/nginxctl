@@ -36,3 +36,8 @@ nginx vhost configuration:
 [::]:80 is a Virtualhost
 	port 80 namevhost  example.com  (/etc/nginx/sites-enabled/example.com:5)
 ```
+
+### Python3 version
+```
+python3 version: https://github.com/sjas/nginxctl/blob/master/nginxctl
+```

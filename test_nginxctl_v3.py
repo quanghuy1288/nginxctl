@@ -58,6 +58,9 @@ class nginxCtlTests(unittest.TestCase):
         self.assertEqual(['8080', '[::]:80'], ip_port)
         vhost_file.close()
 
+    def test_is_valid_config(self):
+        n = nginxctl.nginxCtl()
+        self.assertTrue(n.is_valid_config())
 
 if __name__ == '__main__':
     unittest.main()

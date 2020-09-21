@@ -431,7 +431,7 @@ Attempt to query /server-status returned an error
 
     def get_vhosts(self):
         vhosts_list = self._get_vhosts()
-        LOG.info( "%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC))
+        LOG.info("%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC))
         for vhost in vhosts_list:
             ip_ports = vhost['ip_port']
             for ip_port_x in ip_ports:
@@ -452,17 +452,17 @@ Attempt to query /server-status returned an error
                 serveralias = vhost.get('alias', None)
                 line_number = vhost.get('l_num', None)
                 config_file = vhost.get('config_file', None)
-                LOG.info( "%s:%s is a Virtualhost" % (ip, port))
-                LOG.info( "port %s namevhost %s %s %s (%s:%s)" % (port,
-                                                                bcolors.OKGREEN,
-                                                                servername,
-                                                                bcolors.ENDC,
-                                                                config_file,
-                                                                line_number))
+                LOG.info("%s:%s is a Virtualhost" % (ip, port))
+                LOG.info("port %s namevhost %s %s %s (%s:%s)" % (port,
+                                                                 bcolors.OKGREEN,
+                                                                 servername,
+                                                                 bcolors.ENDC,
+                                                                 config_file,
+                                                                 line_number))
                 for alias in serveralias:
-                    LOG.info( "alias %s %s %s" % (bcolors.CYAN,
-                                                  alias,
-                                                  bcolors.ENDC))
+                    LOG.info("alias %s %s %s" % (bcolors.CYAN,
+                                                 alias,
+                                                 bcolors.ENDC))
 
 
 def main():
