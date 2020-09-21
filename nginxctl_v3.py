@@ -273,131 +273,6 @@ Attempt to query /server-status returned an error
             LOG.error("nginx is stopped")
         return r
 
-    @timer(logger=LOG)
-    def reload_nginx(self):
-        """
-        Ensure there is no syntax errors are reported.
-        The 'nginx -s reload' command is used for this.
-        """
-        LOG.debug("reload_nginx")
-
-        is_successed = False
-        pid_master = self.get_pid_number_nginx()
-
-        if pid_master is None:
-            LOG.error('nginx pid is not available')
-            return False
-
-        if pid_master:
-            pids_children_current = self.get_child_processes_nginx(pid_master)
-
-            try:
-                output = subprocess.check_output(['nginx', '-s', 'reload'], stderr=subprocess.STDOUT)
-                LOG.warning('subprocess code: {}'.format(output))
-                '''check reload nginx successed'''
-                LOG.debug('checking_reload_nginx')
-                # count = 12
-                # while count > 0:
-                #     tick = 0
-                #     pids_childrent_newest = self.get_child_processes_nginx(pid_master)
-                #     LOG.debug('pid_newest: %s, pid_old %s' % (pids_childrent_newest, pids_children_current))
-                #     for pid in pids_childrent_newest:
-                #         if pid in pids_children_current:
-                #             tick += 1
-                #     if not tick:
-                #         LOG.debug("YES")
-                #         is_successed = True
-                #         break
-                #     count -= 1
-                #     time.sleep(10)
-            except subprocess.CalledProcessError as exc:
-                LOG.error(exc.output)
-            except Exception as e:
-                LOG.error(e)
-
-            # p = subprocess.Popen(
-            #     "nginx -s reload",
-            #     stdout=subprocess.PIPE,
-            #     stderr=subprocess.PIPE,
-            #     shell=True
-            # )
-            # output, err = p.communicate()
-            # if not output:
-            #     '''check reload nginx successed'''
-            #     LOG.debug('checking_reload_nginx')
-            #     count = 54
-            #
-            #     while count > 0:
-            #         tick = 0
-            #         pids_childrent_newest = self.get_child_processes_nginx(pid_master)
-            #         LOG.debug('pid_newest: %s, pid_old %s' % (pids_childrent_newest, pids_children_current))
-            #         for pid in pids_childrent_newest:
-            #             if pid in pids_children_current:
-            #                 tick += 1
-            #         if not tick:
-            #             LOG.debug("YES")
-            #             is_successed = True
-            #             break
-            #         count -= 1
-            #         time.sleep(10)
-            #     LOG.debug('reload_nginx_successed')
-            # else:
-            #     LOG.info(err)
-        return is_successed
-
-    @timer(logger=LOG)
-    def reload_nginx2(self):
-        """
-        Ensure there is no syntax errors are reported.
-        The 'nginx -s reload' command is used for this.
-        """
-        LOG.info("reload_nginx")
-
-        is_successed = False
-        pid_master = self.get_pid_number_nginx()
-
-        if pid_master is None:
-            return False
-
-        if pid_master:
-            kill = lambda process: process.kill()
-            p = subprocess.Popen(
-                "nginx -s reload",
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                shell=True
-            )
-            my_timer = Timer(180, kill, [p])
-            try:
-                my_timer.start()
-                stdout, stderr = p.communicate()
-                if not stdout:
-                    '''reload nginx successed'''
-                    LOG.debug('reload_nginx_successed')
-                else:
-                    LOG.error(stderr)
-            finally:
-                my_timer.cancel()
-        return True
-
-    def get_child_processes_nginx(self, parent_pid):
-        """
-        get child processes of nginx
-        :param parent_pid: master pid of nginx
-        :return: list []
-        """
-        ps_command = subprocess.Popen("ps -o pid --ppid %d --noheaders" % parent_pid, shell=True,
-                                      stdout=subprocess.PIPE)
-        ps_output = ps_command.stdout.read()
-        retcode = ps_command.wait()
-        # print 'ccc %d' % retcode
-        # assert retcode == 0, "ps command returned %d" % retcode
-        pids = []
-        if not retcode:
-            for pid_str in ps_output.split("\n")[:-1]:
-                pids.append(pid_str)
-        return pids
-
     def _get_vhosts(self):
         """
         get vhosts
@@ -575,8 +450,9 @@ Attempt to query /server-status returned an error
 
     def get_vhosts(self):
         vhosts_list = self._get_vhosts()
-        LOG.info("%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC))
+        LOG.info("nginx vhost configuration count: {}".format(len(vhosts_list)))
         for vhost in vhosts_list:
+            LOG.info('nginx vhost: {}'.format(vhost))
             ip_ports = vhost['ip_port']
             for ip_port_x in ip_ports:
                 if '[::]' in ip_port_x:
@@ -596,17 +472,17 @@ Attempt to query /server-status returned an error
                 serveralias = vhost.get('alias', None)
                 line_number = vhost.get('l_num', None)
                 config_file = vhost.get('config_file', None)
-                LOG.info("%s:%s is a Virtualhost" % (ip, port))
-                LOG.info("port %s namevhost %s %s %s (%s:%s)" % (port,
-                                                                 bcolors.OKGREEN,
-                                                                 servername,
-                                                                 bcolors.ENDC,
-                                                                 config_file,
-                                                                 line_number))
+                LOG.debug("%s:%s is a Virtualhost" % (ip, port))
+                LOG.debug("port %s namevhost %s %s %s (%s:%s)" % (port,
+                                                                  bcolors.OKGREEN,
+                                                                  servername,
+                                                                  bcolors.ENDC,
+                                                                  config_file,
+                                                                  line_number))
                 for alias in serveralias:
-                    LOG.info("alias %s %s %s" % (bcolors.CYAN,
-                                                 alias,
-                                                 bcolors.ENDC))
+                    LOG.debug("alias %s %s %s" % (bcolors.CYAN,
+                                                  alias,
+                                                  bcolors.ENDC))
 
     # added
     def get_pid_number_nginx(self):
@@ -622,6 +498,131 @@ Attempt to query /server-status returned an error
             except IOError:
                 LOG.error("Cannot open nginx pid file")
         return pid
+
+    @timer(logger=LOG)
+    def reload_nginx(self):
+        """
+        Ensure there is no syntax errors are reported.
+        The 'nginx -s reload' command is used for this.
+        """
+        LOG.debug("reload_nginx")
+
+        is_successed = False
+        pid_master = self.get_pid_number_nginx()
+
+        if pid_master is None:
+            LOG.error('nginx pid is not available')
+            return False
+
+        if pid_master:
+            pids_children_current = self.get_child_processes_nginx(pid_master)
+
+            try:
+                output = subprocess.check_output(['nginx', '-s', 'reload'], stderr=subprocess.STDOUT)
+                LOG.warning('subprocess code: {}'.format(output))
+                '''check reload nginx successed'''
+                LOG.debug('checking_reload_nginx')
+                # count = 12
+                # while count > 0:
+                #     tick = 0
+                #     pids_childrent_newest = self.get_child_processes_nginx(pid_master)
+                #     LOG.debug('pid_newest: %s, pid_old %s' % (pids_childrent_newest, pids_children_current))
+                #     for pid in pids_childrent_newest:
+                #         if pid in pids_children_current:
+                #             tick += 1
+                #     if not tick:
+                #         LOG.debug("YES")
+                #         is_successed = True
+                #         break
+                #     count -= 1
+                #     time.sleep(10)
+            except subprocess.CalledProcessError as exc:
+                LOG.error(exc.output)
+            except Exception as e:
+                LOG.error(e)
+
+            # p = subprocess.Popen(
+            #     "nginx -s reload",
+            #     stdout=subprocess.PIPE,
+            #     stderr=subprocess.PIPE,
+            #     shell=True
+            # )
+            # output, err = p.communicate()
+            # if not output:
+            #     '''check reload nginx successed'''
+            #     LOG.debug('checking_reload_nginx')
+            #     count = 54
+            #
+            #     while count > 0:
+            #         tick = 0
+            #         pids_childrent_newest = self.get_child_processes_nginx(pid_master)
+            #         LOG.debug('pid_newest: %s, pid_old %s' % (pids_childrent_newest, pids_children_current))
+            #         for pid in pids_childrent_newest:
+            #             if pid in pids_children_current:
+            #                 tick += 1
+            #         if not tick:
+            #             LOG.debug("YES")
+            #             is_successed = True
+            #             break
+            #         count -= 1
+            #         time.sleep(10)
+            #     LOG.debug('reload_nginx_successed')
+            # else:
+            #     LOG.info(err)
+        return is_successed
+
+    @timer(logger=LOG)
+    def reload_nginx2(self):
+        """
+        Ensure there is no syntax errors are reported.
+        The 'nginx -s reload' command is used for this.
+        """
+        LOG.info("reload_nginx")
+
+        is_successed = False
+        pid_master = self.get_pid_number_nginx()
+
+        if pid_master is None:
+            return False
+
+        if pid_master:
+            kill = lambda process: process.kill()
+            p = subprocess.Popen(
+                "nginx -s reload",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True
+            )
+            my_timer = Timer(180, kill, [p])
+            try:
+                my_timer.start()
+                stdout, stderr = p.communicate()
+                if not stdout:
+                    '''reload nginx successed'''
+                    LOG.debug('reload_nginx_successed')
+                else:
+                    LOG.error(stderr)
+            finally:
+                my_timer.cancel()
+        return True
+
+    def get_child_processes_nginx(self, parent_pid):
+        """
+        get child processes of nginx
+        :param parent_pid: master pid of nginx
+        :return: list []
+        """
+        ps_command = subprocess.Popen("ps -o pid --ppid %d --noheaders" % parent_pid, shell=True,
+                                      stdout=subprocess.PIPE)
+        ps_output = ps_command.stdout.read()
+        retcode = ps_command.wait()
+        # print 'ccc %d' % retcode
+        # assert retcode == 0, "ps command returned %d" % retcode
+        pids = []
+        if not retcode:
+            for pid_str in ps_output.split("\n")[:-1]:
+                pids.append(pid_str)
+        return pids
 
     def get_vhosts2(self):
         """
