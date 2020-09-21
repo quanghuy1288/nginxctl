@@ -2,6 +2,7 @@ import unittest
 import nginxctl_v3 as nginxctl
 import mock
 import tempfile
+from config import LOG
 
 
 class nginxCtlTests(unittest.TestCase):
@@ -12,12 +13,13 @@ class nginxCtlTests(unittest.TestCase):
         n = nginxctl.nginxCtl()
         self.assertEqual(n._strip_line(test_str), result_test_str)
 
-    @mock.patch('nginxctl.nginxCtl.get_conf_parameters')
+    @mock.patch('nginxctl_v3.nginxCtl.get_conf_parameters')
     def test_nginx_conf(self, conf_param):
         n = nginxctl.nginxCtl()
         conf_param.return_value = {'--conf-path': '/etc/nginx/nginx.conf',
                                    '--lock-path': '/var/lock/nginx.lock'}
         assert n.get_nginx_conf() == '/etc/nginx/nginx.conf'
+        LOG.info(n.get_nginx_lock())
         assert n.get_nginx_lock() == '/var/lock/nginx.lock'
 
     def test_get_vhosts_info(self):

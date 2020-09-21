@@ -529,3 +529,15 @@ Attempt to query /server-status returned an error
                 LOG.info("\n")
 
         self.configtest_nginx()
+
+    def _strip_line(self, path, remove=None):
+        """ Removes any trailing semicolons, and all quotes from a string
+        """
+        if remove is None:
+            remove = ['"', "'", ';']
+        for c in remove:
+            if c in path:
+                path = path.replace(c, '')
+
+        return path
+
