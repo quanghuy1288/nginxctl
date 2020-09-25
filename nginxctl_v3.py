@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib2
 from threading import Timer
 
@@ -108,12 +109,11 @@ class nginxCtl:
         """
         Start nginx service if pid and socket file do not exist.
         """
-        r = False
         nginx_conf_path = self.get_nginx_conf()
         nginx_lock_path = self.get_nginx_lock()
-        if os.path.exists(nginx_lock_path):
-            LOG.info("nginx is already running... Nothing to be done!")
-            r = True
+        nginx_pid_path = self.get_nginx_pid()
+        if os.path.exists(nginx_pid_path):
+            pass
         else:
             cmd = "nginx -c " + nginx_conf_path
             p = subprocess.Popen(cmd,
@@ -129,16 +129,15 @@ class nginxCtl:
                     bcolors.OKGREEN,
                     bcolors.ENDC
                 ))
-                r = True
             else:
-                LOG.info(err)
-        return r
+                LOG.error(err)
+        time.sleep(1)
+        return self.status_nginx()
 
     def stop_nginx(self):
         """
         Stop nginx service.
         """
-        r = False
         nginx_pid_path = self.get_nginx_pid()
         nginx_lock_path = self.get_nginx_lock()
         if os.path.exists(nginx_pid_path):
@@ -155,6 +154,7 @@ class nginxCtl:
                 pid, err = p.communicate()
             except IOError:
                 LOG.error("Cannot open nginx pid file")
+
             if pid:
                 cmd = "nginx -s quit"
                 p = subprocess.Popen(cmd,
@@ -170,10 +170,10 @@ class nginxCtl:
                             bcolors.OKGREEN,
                             bcolors.ENDC
                         ))
-                        r = True
                 else:
                     LOG.info(err)
-        return r
+        time.sleep(1)
+        return not self.status_nginx()
 
     def configtest_nginx(self, file=None):
         """
@@ -212,9 +212,7 @@ class nginxCtl:
         """
         Restart nginx service. Stop and Start nginx functions are used.
         """
-        if not self.stop_nginx():
-            return False
-
+        self.stop_nginx()
         return self.start_nginx()
 
     def full_status(self):
@@ -266,11 +264,13 @@ Attempt to query /server-status returned an error
                     r = True
             except IOError:
                 LOG.error("Cannot open nginx pid file")
-        elif (os.path.exists(nginx_lock_path) and not
-        os.path.exists(nginx_pid_path)):
-            LOG.info("nginx pid file exists")
+
+        elif (os.path.exists(nginx_lock_path) and not os.path.exists(nginx_pid_path)):
+            os.remove(nginx_lock_path)
+            LOG.info(
+                "nginx lock file {} exists but nginx pid file {} not exists!".format(nginx_lock_path, nginx_pid_path))
         else:
-            LOG.error("nginx is stopped")
+            LOG.info("nginx is stopped")
         return r
 
     def _get_vhosts(self):
@@ -505,7 +505,6 @@ Attempt to query /server-status returned an error
         Ensure there is no syntax errors are reported.
         The 'nginx -s reload' command is used for this.
         """
-        LOG.debug("reload_nginx")
 
         is_successed = False
         pid_master = self.get_pid_number_nginx()
@@ -519,56 +518,12 @@ Attempt to query /server-status returned an error
 
             try:
                 output = subprocess.check_output(['nginx', '-s', 'reload'], stderr=subprocess.STDOUT)
-                LOG.warning('subprocess code: {}'.format(output))
-                '''check reload nginx successed'''
-                LOG.debug('checking_reload_nginx')
-                # count = 12
-                # while count > 0:
-                #     tick = 0
-                #     pids_childrent_newest = self.get_child_processes_nginx(pid_master)
-                #     LOG.debug('pid_newest: %s, pid_old %s' % (pids_childrent_newest, pids_children_current))
-                #     for pid in pids_childrent_newest:
-                #         if pid in pids_children_current:
-                #             tick += 1
-                #     if not tick:
-                #         LOG.debug("YES")
-                #         is_successed = True
-                #         break
-                #     count -= 1
-                #     time.sleep(10)
+                if not output:
+                    return True
             except subprocess.CalledProcessError as exc:
                 LOG.error(exc.output)
             except Exception as e:
                 LOG.error(e)
-
-            # p = subprocess.Popen(
-            #     "nginx -s reload",
-            #     stdout=subprocess.PIPE,
-            #     stderr=subprocess.PIPE,
-            #     shell=True
-            # )
-            # output, err = p.communicate()
-            # if not output:
-            #     '''check reload nginx successed'''
-            #     LOG.debug('checking_reload_nginx')
-            #     count = 54
-            #
-            #     while count > 0:
-            #         tick = 0
-            #         pids_childrent_newest = self.get_child_processes_nginx(pid_master)
-            #         LOG.debug('pid_newest: %s, pid_old %s' % (pids_childrent_newest, pids_children_current))
-            #         for pid in pids_childrent_newest:
-            #             if pid in pids_children_current:
-            #                 tick += 1
-            #         if not tick:
-            #             LOG.debug("YES")
-            #             is_successed = True
-            #             break
-            #         count -= 1
-            #         time.sleep(10)
-            #     LOG.debug('reload_nginx_successed')
-            # else:
-            #     LOG.info(err)
         return is_successed
 
     @timer(logger=LOG)
@@ -788,7 +743,7 @@ def main():
     if len(commandline_args) == 1:
         for argument in commandline_args:
             if argument in allCommandsDict:
-                allCommandsDict[argument]()
+                print allCommandsDict[argument]()
             else:
                 usage()
     elif len(commandline_args) == 2:
@@ -796,7 +751,7 @@ def main():
             flag = sys.argv[2:]
             for f in flag:
                 if f in subcommandsDict:
-                    subcommandsDict[f]()
+                    print subcommandsDict[f]()
         else:
             usage()
     else:
