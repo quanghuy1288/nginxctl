@@ -710,26 +710,16 @@ def main():
         print "Available options:"
         print "\t-S list nginx vhosts"
         print "\t-t configuration test"
-        print "\t-k start|stop|status|restart|fullstatus|reload"
+        print "\t-tt check valid configuration"
+        print "\t start|stop|status|restart|fullstatus|reload|test_config"
         print "\t-v version"
         print "\t-h help"
 
     def version():
-        print "version 1.3"
-
-    commandsDict = {"-S": n.get_vhosts,
-                    "-t": n.configtest_nginx,
-                    "-k": n.restart_nginx,
-                    "-v": version,
-                    "-h": usage}
-    subcommandsDict = {"start": n.start_nginx,
-                       "stop": n.stop_nginx,
-                       "restart": n.restart_nginx,
-                       "status": n.status_nginx,
-                       "fullstatus": n.full_status}
+        print "version 1.3.1"
     allCommandsDict = {"-S": n.get_vhosts,
                        "-t": n.configtest_nginx,
-                       "-k": usage,
+                       "-tt": n.is_valid_config,
                        "-v": version,
                        "-h": usage,
                        "start": n.start_nginx,
@@ -746,14 +736,6 @@ def main():
                 print allCommandsDict[argument]()
             else:
                 usage()
-    elif len(commandline_args) == 2:
-        if sys.argv[1] == "-k":
-            flag = sys.argv[2:]
-            for f in flag:
-                if f in subcommandsDict:
-                    print subcommandsDict[f]()
-        else:
-            usage()
     else:
         usage()
 
